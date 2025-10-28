@@ -218,3 +218,24 @@ html { scroll-behavior: smooth; }
 
 /* Se hai una navbar fissa alta 80px: evita che copra il titolo */
 #mdf-consigliati { scroll-margin-top: 80px; }
+
+/* Tooltip permanente sopra ai marker (etichette data+luogo) */
+.leaflet-tooltip.point-label{
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: #000000;              /* testo chiaro */
+  font-weight: 600;
+  padding: 0 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,.9);  /* migliore leggibilità */
+  pointer-events: none;         /* non cattura click */
+  text-align: center;    /* più pulito sopra al marker */
+  line-height: 1.15;     /* compatta un filo */
+}
+
+/* Migliora leggibilità elenco punti (data in evidenza, allineamenti) */
+.list li{ align-items: flex-start; }               /* consente 2 righe nella colonna di destra */
+.list li .idx{ min-width: 28px; color: var(--muted); flex: 0 0 auto; }
+.list li .lbl{ flex: 1; }
+.list li .date{ font-weight: 700; color: #e5e7eb; }   /* data più chiara e bold */
+.list li .place{ color: #cbd5e1; }                    /* luogo un filo più tenue */

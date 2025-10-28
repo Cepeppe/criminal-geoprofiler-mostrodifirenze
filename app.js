@@ -84,23 +84,62 @@
     addPoint(lat, lon); map.panTo([lat, lon]); coordInputEl.value = '';
   });
 
-  function addPoint(lat, lng){
+  function addPoint(lat, lng, label){
     const marker = L.marker([lat, lng], { draggable:false }).addTo(map);
+
+    // Etichetta sopra il segnaposto (se fornita)
+    if (label){
+    const labelHtml = label
+      .replace(/\s—\s/, '<br>')   // em dash
+      .replace(/\s-\s/, '<br>');  // fallback su trattino normale
+
+    marker.bindTooltip(labelHtml, {
+      permanent: true,
+      direction: 'top',
+      offset: [0, -8],
+      className: 'point-label'
+    });
+  }
+
     marker.on('click', () => {
       const idx = markers.findIndex(m => m.marker === marker);
       if (idx >= 0){ markers.splice(idx,1); map.removeLayer(marker); refreshList(); }
     });
-    markers.push({marker, lat, lng}); refreshList();
+
+    markers.push({marker, lat, lng, label});
+    refreshList();
   }
+  
   function refreshList(){
     kpiCount.textContent = markers.length.toString();
     pointsList.innerHTML = '';
+
     markers.forEach((m, i) => {
       const li = document.createElement('li');
-      li.innerHTML = `<span>#${i+1}</span><span>${m.lat.toFixed(5)}, ${m.lng.toFixed(5)}</span>`;
+
+      if (m.label){
+        // Split su " — " (em dash) o " - "
+        const parts = m.label.split(/\s—\s|\s-\s/);
+        const date  = parts[0] || m.label;
+        const place = parts.slice(1).join(' — ') || '';
+
+        li.innerHTML = `
+          <span class="idx">#${i+1}</span>
+          <span class="lbl">
+            <span class="date">${date}</span>
+            ${place ? `<br><span class="place">${place}</span>` : ''}
+          </span>`;
+      } else {
+        li.innerHTML = `
+          <span class="idx">#${i+1}</span>
+          <span class="lbl">${m.lat.toFixed(5)}, ${m.lng.toFixed(5)}</span>`;
+      }
+
       pointsList.appendChild(li);
     });
   }
+
+
   function clearOverlay(){
     if (heatLayer){ map.removeLayer(heatLayer); heatLayer = null; }
     kpiGrid.textContent = '–'; kpiTime.textContent = '–';
@@ -241,31 +280,34 @@
   })();
 
   // --- Dataset & presets ---
+  // DOPO: etichette con data + luogo (tabella fornita)
   const MOSTRO_ALL = [
-    { label: '1968 — Castelletti (Signa)', lat: 43.794588, lng: 11.082310 },
-    { label: '1974 — Rabatta (Sagginale/Borgo S. Lorenzo)', lat: 43.939006, lng: 11.416401 },
-    { label: '1981 — Mosciano (Scandicci)', lat: 43.733137, lng: 11.168896 },
-    { label: '1981 — Le Bartoline (Travalle/Calenzano)', lat: 43.871624, lng: 11.159006 },
-    { label: '1982 — Baccaiano (Montespertoli)', lat: 43.654490, lng: 11.090818 },
-    { label: '1983 — Giogoli (Galluzzo)', lat: 43.732229, lng: 11.206382 },
-    { label: '1984 — La Boschetta (Vicchio)', lat: 43.918821, lng: 11.497872 },
-    { label: '1985 — Scopeti (San Casciano VP)', lat: 43.694574, lng: 11.202129 }
+    { label: '21 ago 1968 — Castelletti di Signa',                         lat: 43.794588, lng: 11.082310 },
+    { label: '14 set 1974 — Fontanine di Rabatta (Sagginale, Borgo San Lorenzo)', lat: 43.939006, lng: 11.416401 },
+    { label: '6 giu 1981 — Mosciano (Scandicci)',                          lat: 43.733137, lng: 11.168896 },
+    { label: '22 ott 1981 — Le Bartoline (Travalle, Calenzano)',           lat: 43.871624, lng: 11.159006 },
+    { label: '19 giu 1982 — Baccaiano (Montespertoli)',                    lat: 43.654490, lng: 11.090818 },
+    { label: '9 set 1983 — Giogoli (Galluzzo, Firenze)',                   lat: 43.732229, lng: 11.206382 },
+    { label: '29 lug 1984 — La Boschetta (Vicchio)',                       lat: 43.918821, lng: 11.497872 },
+    { label: '6–8 set 1985 — Scopeti (San Casciano in Val di Pesa)',       lat: 43.694574, lng: 11.202129 }
   ];
+
   const CLUSTER_SW = [
-    { label: 'Scandicci — Mosciano', lat: 43.733137, lng: 11.168896 },
-    { label: 'Giogoli — Galluzzo', lat: 43.732229, lng: 11.206382 },
-    { label: 'Scopeti — San Casciano', lat: 43.694574, lng: 11.202129 },
-    { label: 'Baccaiano — Montespertoli', lat: 43.654490, lng: 11.090818 }
+    { label: '6 giu 1981 — Mosciano (Scandicci)',                          lat: 43.733137, lng: 11.168896 },
+    { label: '9 set 1983 — Giogoli (Galluzzo, Firenze)',                   lat: 43.732229, lng: 11.206382 },
+    { label: '6–8 set 1985 — Scopeti (San Casciano in Val di Pesa)',       lat: 43.694574, lng: 11.202129 },
+    { label: '19 giu 1982 — Baccaiano (Montespertoli)',                    lat: 43.654490, lng: 11.090818 }
   ];
+
   const CLUSTER_N = [
-    { label: 'Travalle — Calenzano', lat: 43.871624, lng: 11.159006 },
-    { label: 'Rabatta — Sagginale/Borgo S. Lorenzo', lat: 43.939006, lng: 11.416401 },
-    { label: 'La Boschetta — Vicchio', lat: 43.918821, lng: 11.497872 }
+    { label: '22 ott 1981 — Le Bartoline (Travalle, Calenzano)',           lat: 43.871624, lng: 11.159006 },
+    { label: '14 set 1974 — Fontanine di Rabatta (Sagginale, Borgo San Lorenzo)', lat: 43.939006, lng: 11.416401 },
+    { label: '29 lug 1984 — La Boschetta (Vicchio)',                       lat: 43.918821, lng: 11.497872 }
   ];
   function removeAllMarkers(){ markers.forEach(m => map.removeLayer(m.marker)); markers = []; refreshList(); }
   function loadPoints(arr, clearBefore){
     if (clearBefore) removeAllMarkers();
-    arr.forEach(p => addPoint(p.lat, p.lng));
+    arr.forEach(p => addPoint(p.lat, p.lng, p.label));
     const b = boundsFromPoints(arr.map(p=>({lat:p.lat,lng:p.lng})));
     const bb = padBounds(b, 2000);
     map.fitBounds([[bb.minLat, bb.minLng],[bb.maxLat, bb.maxLng]], {padding:[20,20]});
