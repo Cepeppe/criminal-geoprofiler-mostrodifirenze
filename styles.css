@@ -212,3 +212,9 @@ body.resizing, body.resizing *{ cursor:col-resize !important; user-select:none; 
 .header > p{
   text-align: center;
 }
+
+/* Scroll morbido opzionale */
+html { scroll-behavior: smooth; }
+
+/* Se hai una navbar fissa alta 80px: evita che copra il titolo */
+#mdf-consigliati { scroll-margin-top: 80px; }
