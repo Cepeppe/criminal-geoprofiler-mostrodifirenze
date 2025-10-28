@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Criminal Geoprofiler — Mostro di Firenze</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <!-- App styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="header">
+      <div class="head-top">
+        <h1 class="app-title">Criminal Geoprofiler — Mostro di Firenze</h1>
+
+      </div>
+      <div class="head-actions">
+          <button id="openTutorial" class="btn btn-ghost small" aria-haspopup="dialog" title="Apri il tutorial">❓ Tutorial</button>
+          <button id="closeSidebar" class="btn btn-ghost small only-mobile" title="Chiudi pannello">✕</button>
+          <button id="openAbout" class="btn btn-ghost small" aria-haspopup="dialog" title="Informazioni">ℹ️ About</button>
+        </div>
+      <p>Demo didattica 100% client-side: aggiungi punti sulla mappa e genera una mappa di probabilità con diversi metodi.</p>
+
+        <!-- About modal -->
+    <div id="aboutModal" class="modal-overlay" role="dialog" aria-modal="true"
+        aria-labelledby="aboutTitle" aria-describedby="aboutBody" hidden>
+        <div class="modal" role="document">
+            <button class="modal-close" id="closeAbout" aria-label="Chiudi About">✕</button>
+            <h2 id="aboutTitle">About — Criminal Geoprofiler</h2>
+
+            <p id="aboutBody" class="muted">
+              Criminal Geoprofiler — Mostro di Firenze è un’applicazione didattica, interamente client-side, pensata per esplorare in modo intuitivo come cambiano le superfici di verosimiglianza al variare dei dati e dei parametri nei principali metodi di geoprofilazione. Puoi caricare o inserire manualmente punti-evento sulla mappa, scegliere il metodo (Rossmo/CGT, KDE gaussiana, Centro di gravità, Journey-to-crime), regolare buffer/bandwidth/λ e visualizzare il risultato come heatmap. Sono inclusi preset per il caso “Mostro di Firenze” a scala provinciale e per due cluster territoriali.
+            <br>
+              Attenzione: i risultati sono indicativi e dipendono da posizionamento, scala, parametri e completezza del dataset. Non costituiscono prova né sostituiscono attività investigative professionali. L’app non effettua correlazioni temporali né inferenze autonome: elabora unicamente i punti forniti dall’utente o dai preset.
+            <br>
+              Contesto MdF: con “Mostro di Firenze” si indica una serie di omicidi avvenuti tra il 1968 e il 1985 nell’area fiorentina. I punti usati qui hanno finalità illustrative per mostrare differenze tra metodi e scale. 
+            <br><br>
+              <strong>L'autore dell’applicazione ritiene, a titolo puramente personale, che la pista del “Rosso del Mugello” sia la più probabile e solida tra le ipotesi considerate; si tratta di un’opinione, non di un fatto accertato. </strong>
+            <br><br>
+              Privacy: l’elaborazione avviene localmente nel browser; l’unico traffico esterno riguarda le librerie CDN e le mappe OSM.
+            <br>
+              Codice sorgente su GitHub: https://github.com/Cepeppe/criminal-geoprofiler-mostrodifirenze
+            </p>
+
+            <div class="gh-link">
+            <!-- Icona GitHub (inline SVG) -->
+            <svg viewBox="0 0 16 16" aria-hidden="true" focusable="false" width="20" height="20">
+                <path fill="currentColor"
+                d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38
+                    0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13
+                    -.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66
+                    .07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15
+                    -.08-.2-.36-1.01.08-2.1 0 0 .67-.21 2.2.82a7.63 7.63 0 0 1 2-.27c.68 0
+                    1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.09.16 1.9.08 2.1.51.56.82
+                    1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01
+                    1.93-.01 2.2 0 .21.15.46.55.38A8.01 8.01 0 0 0 16 8c0-4.42-3.58-8-8-8z"/>
+            </svg>
+            <a href="https://github.com/USER/REPO" target="_blank" rel="noopener noreferrer">
+                github.com/USER/REPO
+            </a>
+            </div>
+
+            <div class="modal-actions">
+            <button class="btn btn-primary" id="aboutOk">Chiudi</button>
+            </div></div>
+        </div>
+    </div>
+
+    <div class="panel">
+      <h2>1) Punti evento</h2>
+      <div class="row">
+        <button id="btnToggleAdd" class="btn">➕ Modalità aggiunta: <span id="addModeState">ON</span></button>
+        <button id="btnUndo" class="btn">↩️ Annulla</button>
+        <button id="btnClear" class="btn btn-danger">🗑️ Svuota</button>
+      </div>
+      <p class="small muted">Clicca sulla mappa per aggiungere un punto. Clic su un marker per rimuoverlo.</p>
+      <div class="kpi">
+        <span class="badge">Punti: <span id="kpiCount">0</span></span>
+        <span class="badge">Griglia: <span id="kpiGrid">–</span></span>
+        <span class="badge">Tempo: <span id="kpiTime">–</span></span>
+      </div>
+      <ul id="pointsList" class="list"></ul>
+    </div>
+
+    <div class="panel">
+      <h2>1.b) Aggiungi da coordinate</h2>
+      <div class="row">
+        <label for="coordInput" class="small">Lat, Lon (es: 43.794588, 11.082310)</label>
+      </div>
+      <div class="row">
+        <input id="coordInput" type="text" placeholder="43.794588, 11.082310" />
+        <button id="btnAddCoord" class="btn">➕ Aggiungi</button>
+      </div>
+      <p class="small muted">Formato accettato: <code>lat, lon</code> (punto decimale). Clic su un marker per rimuoverlo.</p>
+    </div>
+
+    <div class="panel"></div>
+
+    <div class="panel">
+      <h2>1.c) Dataset — Mostro di Firenze</h2>
+      <div class="desc small">
+        <p>Carica i punti storici (1968–1985) direttamente come marker. Puoi poi aggiungere/rimuovere a mano, o filtrare per cluster geografico.</p>
+      </div>
+      <div class="row wrap">
+        <button id="btnLoadAll" class="btn">Carica tutti (8)</button>
+        <button id="btnLoadSW" class="btn">Carica cluster Sud-Ovest</button>
+        <button id="btnLoadN" class="btn">Carica cluster Nord/NE</button>
+        <button id="btnClearAll" class="btn btn-danger">Svuota punti</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h2>2) Metodo</h2>
+      <div class="row">
+        <label for="method">Seleziona formula</label>
+        <select id="method">
+          <option value="rossmo">Rossmo / CGT</option>
+          <option value="kde">KDE (Gaussiana)</option>
+          <option value="meanCenter">Centro di gravità</option>
+          <option value="journey">Journey-to-crime (esponenziale)</option>
+        </select>
+      </div>
+
+      <div id="params-rossmo" class="params">
+        <div class="row"><label>Buffer B (km)</label><input id="rossmoB" type="number" step="0.1" value="1.0"></div>
+        <div class="row"><label>f (decadimento)</label><input id="rossmoF" type="number" step="0.1" value="1.2"></div>
+        <div class="row"><label>g (compensazione)</label><input id="rossmoG" type="number" step="0.1" value="1.8"></div>
+      </div>
+
+      <div id="params-kde" class="params" style="display:none">
+        <div class="row"><label>Bandwidth σ (km)</label><input id="kdeSigma" type="number" step="0.1" value="1.2"></div>
+      </div>
+
+      <div id="params-meanCenter" class="params" style="display:none">
+        <div class="row"><label>Scala σ multipla</label><input id="mcScale" type="number" step="0.1" value="1.0"></div>
+      </div>
+
+      <div id="params-journey" class="params" style="display:none">
+        <div class="row"><label>Lambda λ (1/km)</label><input id="journeyLambda" type="number" step="0.05" value="0.7"></div>
+      </div>
+
+      <div class="row"><label>Passo griglia (m)</label><input id="gridStep" type="number" step="50" value="300"></div>
+      <div class="row"><label>Raggio heatmap (px)</label><input id="heatRadius" type="number" step="1" value="18"></div>
+
+      <div class="row">
+        <button id="btnRun" class="btn btn-primary">🔥 Calcola & mostra</button>
+        <button id="btnClearOverlay" class="btn">🧹 Pulisci overlay</button>
+      </div>
+
+      <div class="legend">
+        <span>Probabilità</span>
+        <div class="legend-bar"></div>
+      </div>
+
+      <p class="attention"> <strong>ATTENZIONE: Se dopo aver premuto il pulsante "Calcola e Mostra" la zona di interesse non è ben visibile, prova ad aumentare il parametro "Raggio heatmap (px)"" e ricalcola</strong></p>
+    </div>
+
+    <div class="panel">
+      <h2>3) Descrizione formula</h2>
+      <div id="methodDesc" class="desc small"></div>
+    </div>
+
+    <div class="panel">
+      <h2>4) Valori consigliati — caso “Mostro di Firenze”</h2>
+      <div class="desc small">
+        <p><b>Come determinarli (regole pratiche):</b></p>
+        <ul>
+          <li><b>Passo griglia</b>: ~ 1/30 della diagonale del bounding box o ~ 1/2–1/3 del <i>nearest neighbor</i>.</li>
+          <li><b>Rossmo B</b>: 0.8–1.5 km nei cluster; 2–3 km su scala provinciale.</li>
+          <li><b>Rossmo f/g</b>: f 1.2–1.5; g 1.6–1.9.</li>
+          <li><b>KDE σ</b>: ≈ 0.8 × mediana distanze k-NN (k=1..3) o 7–10% diagonale.</li>
+          <li><b>Journey λ</b>: scegli <i>d<sub>1/2</sub></i> e usa λ = ln(2)/d<sub>1/2</sub>.</li>
+        </ul>
+      </div>
+
+      <details class="acc" open>
+        <summary><span class="caret"></span><span><b>A)</b> Scala provinciale (tutti gli 8 punti)</span></summary>
+        <ul class="list kv">
+          <li><span>Griglia / Heatmap</span><span>passo ≈ <b>700 m</b> · raggio ≈ <b>24 px</b></span></li>
+          <li><span>Rossmo/CGT</span><span>B=<b>2.5 km</b>; f=<b>1.2</b>; g=<b>1.6</b> <button id="applyProvRossmo" class="btn">Applica</button></span></li>
+          <li><span>KDE</span><span>σ = <b>2.8 km</b> <button id="applyProvKDE" class="btn">Applica</button></span></li>
+          <li><span>Centro di gravità</span><span>scala σ = <b>1.1×</b> <button id="applyProvMC" class="btn">Applica</button></span></li>
+          <li><span>Journey-to-crime</span><span>λ = <b>0.25 1/km</b> (d<sub>1/2</sub>≈2.77 km) <button id="applyProvJourney" class="btn">Applica</button></span></li>
+        </ul>
+      </details>
+
+      <details class="acc">
+        <summary><span class="caret"></span><span><b>B)</b> Cluster Sud-Ovest</span></summary>
+        <ul class="list kv">
+          <li><span>Griglia / Heatmap</span><span>passo ≈ <b>325 m</b> · raggio ≈ <b>18 px</b></span></li>
+          <li><span>Rossmo/CGT</span><span>B=<b>1.0 km</b>; f=<b>1.4</b>; g=<b>1.8</b> <button id="applySWRossmo" class="btn">Applica</button></span></li>
+          <li><span>KDE</span><span>σ = <b>0.9 km</b> <button id="applySWKDE" class="btn">Applica</button></span></li>
+          <li><span>Centro di gravità</span><span>scala σ = <b>0.9×</b> <button id="applySWMC" class="btn">Applica</button></span></li>
+          <li><span>Journey-to-crime</span><span>λ = <b>0.60 1/km</b> <button id="applySWJourney" class="btn">Applica</button></span></li>
+        </ul>
+      </details>
+
+      <details class="acc">
+        <summary><span class="caret"></span><span><b>C)</b> Cluster Nord / NE</span></summary>
+        <ul class="list kv">
+          <li><span>Griglia / Heatmap</span><span>passo ≈ <b>400 m</b> · raggio ≈ <b>18 px</b></span></li>
+          <li><span>Rossmo/CGT</span><span>B=<b>1.2 km</b>; f=<b>1.3</b>; g=<b>1.7</b> <button id="applyNRossmo" class="btn">Applica</button></span></li>
+          <li><span>KDE</span><span>σ = <b>1.2 km</b> <button id="applyNKDE" class="btn">Applica</button></span></li>
+          <li><span>Centro di gravità</span><span>scala σ = <b>1.0×</b> <button id="applyNMC" class="btn">Applica</button></span></li>
+          <li><span>Journey-to-crime</span><span>λ = <b>0.50 1/km</b> <button id="applyNJourney" class="btn">Applica</button></span></li>
+        </ul>
+      </details>
+    </div>
+
+    <div class="footer">
+      <div class="pill">🗺️ Tiles: OpenStreetMap · Motore: Leaflet + Leaflet.heat</div>
+      <div class="sep"></div>
+      <p class="small">Questa è una demo didattica. Le superfici mostrate sono <b>indicative</b> e dipendono dai parametri scelti.</p>
+    </div>
+  </aside>
+
+  <div id="resizer" aria-label="Ridimensiona pannello" title="Trascina per ridimensionare"></div>
+  <main id="map"></main>
+</div>
+
+<!-- Scrim per drawer mobile -->
+<div id="sidebarScrim" class="scrim" hidden></div>
+<!-- FAB per aprire la sidebar su mobile -->
+<button id="toggleSidebar" class="fab only-mobile" title="Apri pannello">☰</button>
+
+<!-- Tutorial modal -->
+<div id="tutorialModal" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="tutorialTitle" aria-describedby="tutorialBody">
+  <div class="modal" role="document">
+    <button class="modal-close" id="closeTutorial" aria-label="Chiudi tutorial">✕</button>
+    <h2 id="tutorialTitle">Criminal Geoprofiler — Mostro di Firenze</h2>
+    <p class="muted" id="tutorialBody">
+      Questa applicazione è una <b>demo didattica</b> di geoprofilazione <i>client-side</i>. Consente di:
+    </p>
+    <ul class="modal-list">
+      <li>Caricare o inserire manualmente i <b>punti-evento</b> su mappa.</li>
+      <li>Generare una superficie di <b>verosimiglianza</b> con più metodi (Rossmo/CGT, KDE, Centro di gravità, Journey-to-crime).</li>
+      <li>Regolare parametri e visualizzare una <b>heatmap</b>.</li>
+    </ul>
+    <div class="modal-steps">
+      <h3>Come si usa (rapido):</h3>
+      <ol>
+        <li>Premi “Carica tutti” o clicca sulla mappa per aggiungere punti.</li>
+        <li>Scegli il <b>metodo</b> e imposta i <b>parametri</b>.</li>
+        <li>Premi <b>“Calcola &amp; mostra”</b> per generare la heatmap.</li>
+      </ol>
+                <p class="attention"> <strong>ATTENZIONE: Se dopo aver premuto il pulsante "Calcola e Mostra" la zona di interesse non è ben visibile, prova ad aumentare il parametro "Raggio heatmap (px)"" e ricalcola</strong></p>
+    </div>
+    <p class="modal-warning">⚠️ Le mappe prodotte sono indicative e non sostituiscono attività investigative professionali ⚠️ </p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="startApp">Inizia</button>
+    </div>
+  </div>
+</div>
+
+<!-- Leaflet & plugins -->
+<script defer src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script defer src="https://unpkg.com/leaflet.heat/dist/leaflet-heat.js"></script>
+
+<!-- App logic -->
+<script defer src="app.js"></script>
+</body>
+</html>

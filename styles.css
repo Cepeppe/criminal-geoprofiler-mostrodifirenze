@@ -1,0 +1,214 @@
+:root{
+  --bg:#0f172a; --panel:#111827; --muted:#94a3b8; --text:#e5e7eb;
+  --accent:#22d3ee; --accent-2:#a78bfa; --danger:#f87171; --ok:#4ade80;
+  --sidebar-w: 380px; --resizer-w: 6px;
+}
+
+/* Garantisce che [hidden] nasconda SEMPRE il nodo (anche se lo stile di base imposta display:grid) */
+[hidden] { display:none !important; }
+
+html, body {height:100%; margin:0; background:var(--bg); color:var(--text);
+  font: 14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial,"Noto Sans","Apple Color Emoji","Segoe UI Emoji";}
+
+.app{display:grid; grid-template-columns: var(--sidebar-w) var(--resizer-w) 1fr; height:100%; position:relative;}
+#map{height:100%; width:100%;}
+
+/* Sidebar */
+.sidebar{background:linear-gradient(180deg, rgba(17,24,39,0.95), rgba(17,24,39,0.98));
+  border-right:1px solid rgba(148,163,184,0.15); overflow:auto; font-size:13.5px;}
+.header{padding:16px 16px 8px; border-bottom:1px solid rgba(148,163,184,0.15);}
+.head-top{display:flex; align-items:center; gap:12px; justify-content:space-between;}
+.header h1{font-size:18px; margin:0 0 6px; letter-spacing:0.2px}
+.header p{margin:0; color:var(--muted); font-size:12.5px}
+.panel{padding:14px 16px; border-bottom:1px solid rgba(148,163,184,0.12);}
+.panel h2{ font-size:13.5px; text-transform:uppercase; letter-spacing:0.6px; color:var(--accent); margin:0 0 10px; }
+.desc{background:#0b1220; border:1px solid rgba(148,163,184,0.2); border-radius:12px; padding:10px 12px; color:#cbd5e1}
+
+.row{display:flex; gap:8px; align-items:center; margin:6px 0}
+.row.wrap{flex-wrap:wrap}
+label{font-size:12.5px; color:var(--muted);}
+input[type="number"], input[type="text"], select{flex:1; min-width:0; background:#0b1220;
+  border:1px solid rgba(148,163,184,0.2); color:var(--text); padding:8px 10px; border-radius:10px; outline:none}
+
+.btn{appearance:none; border:0; border-radius:12px; padding:9px 12px; background:#0b1220; color:var(--text);
+  cursor:pointer; transition:transform .05s ease, box-shadow .2s ease, background .2s ease; border:1px solid rgba(148,163,184,0.2)}
+.btn:hover{box-shadow:0 0 0 2px rgba(34,211,238,0.25) inset;}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:linear-gradient(90deg, rgba(34,211,238,0.25), rgba(167,139,250,0.25)); border-color: rgba(34,211,238,0.45)}
+.btn-danger{border-color: rgba(248,113,113,0.5); color:#fecaca}
+.btn-ghost{background:transparent; border-color:rgba(148,163,184,0.25);}
+
+.small{font-size:12px}
+.kpi{display:flex; gap:8px; flex-wrap:wrap}
+.badge{padding:3px 8px; border-radius:999px; border:1px solid rgba(148,163,184,0.25); color:var(--muted); font-size:11.5px}
+.legend{display:flex; align-items:center; gap:8px}
+.legend-bar{height:10px; flex:1; background: linear-gradient(90deg, rgba(2,132,199,1) 0%, rgba(34,197,94,1) 50%, rgba(234,88,12,1) 100%); border-radius:999px}
+.footer{padding:10px 16px 16px; color:var(--muted); font-size:12.5px}
+.pill{display:inline-flex; align-items:center; gap:6px; padding:4px 8px; border-radius:999px; background:rgba(2,132,199,0.12); border:1px solid rgba(2,132,199,0.3)}
+.list{margin:8px 0 0; padding:0; list-style:none}
+.list li{display:flex; justify-content:space-between; padding:4px 0; border-bottom:1px dashed rgba(148,163,184,0.15)}
+.list li:last-child{border-bottom:0}
+
+/* Collapsible */
+details.acc{ border:1px solid rgba(148,163,184,0.18); border-radius:10px; padding:6px 10px; background:#0b1220; margin:8px 0; }
+details.acc[open]{ background:linear-gradient(180deg, rgba(11,18,32,1), rgba(11,18,32,0.94)); }
+details.acc summary{ cursor:pointer; list-style:none; display:flex; align-items:center; gap:8px; }
+details.acc summary::-webkit-details-marker{ display:none; }
+.caret{ width:0; height:0; border-left:6px solid transparent; border-right:6px solid transparent; border-top:8px solid var(--accent-2); transition:transform .2s ease; }
+details.acc[open] .caret{ transform:rotate(180deg); }
+
+/* Leaflet dark tweaks */
+.leaflet-container{background:#0a0f1f}
+.leaflet-control-attribution{background:rgba(0,0,0,0.3)!important; color:#cbd5e1}
+.leaflet-popup-content {color:#0b1220}
+
+/* Resizer desktop */
+#resizer{ background:rgba(148,163,184,0.15); cursor:col-resize; }
+#resizer:hover{ background:rgba(34,211,238,0.35); }
+body.resizing, body.resizing *{ cursor:col-resize !important; user-select:none; }
+
+/* Modal */
+.modal-overlay{position:fixed; inset:0; display:grid; place-items:center; background:rgba(0,0,0,0.55); backdrop-filter: blur(2px); z-index:5000;}
+.modal{position:relative; width:min(720px, 92vw); max-height:90vh; overflow:auto; background:#0b1220; color:var(--text);
+  border:1px solid rgba(148,163,184,0.25); border-radius:16px; padding:18px 18px 16px; box-shadow: 0 10px 40px rgba(0,0,0,0.6);}
+.modal h2{margin:0 0 8px; font-size:18px}
+.modal .modal-list{margin:6px 0 12px 18px}
+.modal .modal-steps h3{margin:10px 0 6px; font-size:14px; color:#c7d2fe}
+.modal .modal-steps ol{margin:6px 0 12px 18px}
+.modal .modal-warning{margin:10px 0; color:#fbbf24}
+.modal-actions{display:flex; justify-content:flex-end; gap:8px}
+.modal-close{position:absolute; right:8px; top:8px; border:0; background:transparent; color:#cbd5e1; font-size:16px; cursor:pointer}
+
+.attention{margin:10px 0; color:#ff0000}
+
+/* Mobile drawer + FAB */
+.only-mobile{display:none;}
+.fab{position:fixed; right:14px; bottom:14px; z-index:4000; border-radius:999px; padding:10px 12px; border:1px solid rgba(148,163,184,0.35); background:#0b1220;}
+.scrim{position:fixed; inset:0; background:rgba(0,0,0,0.45); z-index:3500;}
+
+/* Mobile layout */
+@media (max-width: 860px){
+  :root{ --sidebar-w: 86vw; --resizer-w: 0px; }
+  .only-mobile{display:inline-flex;}
+  #resizer{ display:none; }
+  .app{ grid-template-columns: 1fr; }
+  /* Sidebar come drawer */
+  .sidebar{
+    position:fixed; inset:0 auto 0 0; width:var(--sidebar-w); max-width:560px; height:100vh;
+    transform: translateX(-100%); transition: transform .25s ease;
+    z-index: 3600; /* sopra la mappa ma sotto il modal */
+  }
+  body.sidebar-open .sidebar{ transform: translateX(0); }
+  /* Scrim mostrato quando sidebar aperta */
+  body.sidebar-open #sidebarScrim{ display:block !important; }
+}
+
+
+
+/* Banner immagine dietro al titolo */
+.app-title{
+  position: relative;
+  display: inline-block;       /* si adatta al testo e può andare a capo */
+  padding: 10px 12px;          /* spazio interno attorno al testo */
+  border-radius: 12px;
+  z-index: 0;                  /* crea un contesto per il ::before sotto */
+}
+
+.app-title::before{
+  content: "";
+  position: absolute;
+  inset: -6px -10px;           /* estende leggermente oltre il testo */
+  border-radius: 14px;
+  /* immagine + velo scuro in un'unica background stack */
+  background-image:
+    linear-gradient(90deg, rgba(15,23,42,.85), rgba(15,23,42,.35), rgba(15,23,42,.85)),
+    url("mostro.jpg");         /* <— cambia in "assets/mostro.jpg" se usi una cartella */
+  background-size: cover;
+  background-position: center 35%;
+  background-repeat: no-repeat;
+  box-shadow: 0 6px 24px rgba(0,0,0,.45);
+  z-index: -1;                 /* sotto il testo */
+  filter: grayscale(100%);     /* opzionale: desatura per leggibilità */
+  opacity: .9;                 /* intensità del banner (regola a piacere) */
+}
+
+/* Mobile: riduce un filo il riquadro per schermi stretti */
+@media (max-width: 860px){
+  .app-title{ padding: 8px 10px; }
+  .app-title::before{ inset: -4px -8px; }
+}
+
+/* Tutorial button: centrato e più lungo */
+.header .head-actions{
+  display: flex;
+  justify-content: center;   /* centra il/i bottone/i */
+  margin-top: 6px;           /* un filo di respiro sotto il titolo */
+}
+
+#openTutorial{
+  min-width: 280px;          /* più lungo */
+  text-align: center;        /* testo centrato */
+  padding-left: 18px;        /* un po' più di padding orizzontale */
+  padding-right: 18px;
+}
+
+/* Su mobile diventa full-width */
+@media (max-width: 860px){
+  #openTutorial{ width: 100%; }
+}
+
+/* Centra il contenitore del titolo */
+.header .head-top{
+  display: flex;
+  justify-content: center;   /* override dello space-between */
+}
+
+/* Centra il titolo e il suo banner (::before) */
+.app-title{
+  margin-inline: auto;       /* centra l'inline-block */
+  text-align: center;        /* testo centrato dentro il banner */
+}
+
+.gh-link{
+  display:flex; align-items:center; gap:8px; margin:12px 0;
+  color:#e5e7eb;
+}
+.gh-link a{
+  color:#93c5fd; text-decoration:underline; word-break:break-all;
+}
+
+/* Contenitore dei bottoni: stack verticale, centrato */
+.header .head-actions{
+  display: flex;
+  flex-direction: column;   /* uno sotto l'altro */
+  align-items: center;      /* centrati orizzontalmente */
+  gap: 8px;
+  margin-top: 6px;
+}
+
+/* Stesse dimensioni per Tutorial e About */
+#openTutorial,
+#openAbout{
+  min-width: 280px;
+  text-align: center;
+  padding-left: 18px;
+  padding-right: 18px;
+}
+
+/* Su mobile: full width */
+@media (max-width: 860px){
+  #openTutorial,
+  #openAbout{
+    width: 100%;
+  }
+}
+
+/* Più spazio tra i bottoni (Tutorial+About) e il testo sottostante */
+.header .head-actions{
+  margin-bottom: 16px;  /* aumenta se vuoi ancora più respiro */
+}
+
+/* Centra il paragrafo sotto il titolo */
+.header > p{
+  text-align: center;
+}
