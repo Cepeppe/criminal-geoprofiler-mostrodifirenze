@@ -159,5 +159,6 @@ Nel pannello dedicato trovi tre preset **(provinciale, cluster SW, cluster N)** 
 - Mappe: © OpenStreetMap contributors — tiles tramite `tile.openstreetmap.org`.
 - Librerie: [Leaflet](https://leafletjs.com/), [Leaflet.heat](https://github.com/Leaflet/Leaflet.heat).
 
-**Licenza**: da definire nel repository (es. MIT/Apache‑2.0/CC).  
-Se manca un file `LICENSE`, si applicano i diritti dell’autore (tutti i diritti riservati).
+**Licenza**: BSD 2-Clause License
+
+Copyright© 2025, Giuseppe Sorgentone
